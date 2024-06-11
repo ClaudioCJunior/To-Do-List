@@ -13,6 +13,8 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CategorizationService } from 'src/categorization/categorization.service';
+import { SortTaskDto } from './dto/sort-task.dto';
+import { ListTaskDto } from './dto/list-task.dto';
 
 @Controller('task')
 export class TaskController {
@@ -21,14 +23,12 @@ export class TaskController {
   @Post()
   async create(@Body() createTaskDto: CreateTaskDto, @Req() req: any) {
       createTaskDto.user = req.user;
-
-      //TODO: Adiciona validações para não duplicar atividades
       return this.taskService.create(createTaskDto);
   }
 
   @Get()
-  findAll(@Req() req: any) {
-    return this.taskService.findAllByUserId(req.user.id);
+  findAll(@Req() req: any, @Body() listTaskDto: ListTaskDto) { 
+    return this.taskService.findAllByUserIdWithSort(req.user.id, listTaskDto);
   }
 
   @Get(':id')
@@ -55,6 +55,15 @@ export class TaskController {
   @Get('categorization/:id')
   findBycategorization(@Param('id') id: number, @Req() req: any) {
     return this.taskService.findAllByCategorizationAndUser(id, req.user.id);
+  }
+
+  @Patch(':id')
+  updateStatus(@Param('id') id: number, @Req() req: any, @Body() body: any ) {
+    return this.taskService.updateStatusByIdAndUserId(
+      id,
+      req.user.id,
+      body.completionStatus,
+    );
   }
   
 }
