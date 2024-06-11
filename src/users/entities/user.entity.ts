@@ -1,19 +1,34 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Task } from 'src/task/entities/task.entity';
+import { OneToMany } from 'typeorm';
 
-export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Entity()
 export class User {
-  @Prop()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   name: string;
 
-  @Prop()
+  @Column({ unique: true })
   email: string;
 
-  @Prop({ set: (password: string) => bcrypt.hash(password, 10) })
+  @Column()
   password: string;
-}
 
-export const UserSchema = SchemaFactory.createForClass(User);
+  @OneToMany(() => Task, task => task.user)
+  tasks: Task[];
+
+  @BeforeInsert()
+  async beforeInsertActions() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  @BeforeUpdate()
+  async beforeUpdateActions() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+}

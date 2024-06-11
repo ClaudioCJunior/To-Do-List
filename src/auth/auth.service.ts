@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import { SignInDto } from './dto/signIn.dto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -17,26 +18,23 @@ export class AuthService {
   ): Promise<{ user: Record<string, string>; access_token: string }> {
     const user = await this.usersService.findOneByEmail(signInDto.email);
 
-    if(!await bcrypt.compare(signInDto.password, user.password)){
+    if (!(await bcrypt.compare(signInDto.password, user.password))) {
       throw new UnauthorizedException();
     }
 
-    const payload = { _id: user._id, name: user.name, email: user.email };
+    const payload = { id: user.id, name: user.name, email: user.email };
     return {
-      user: { name: user.name, email: user.email },
+      user : {  name: user.name, email: user.email },
       access_token: await this.jwtService.signAsync(payload),
     };
   }
 
-  async register(
-    registerDto: RegisterDto,
-  ): Promise<Record<string, string>> {
+  async register(registerDto: RegisterDto): Promise<Record<string, string>> {
     const user = await this.usersService.create(registerDto);
 
     return {
       name: user.name,
       email: user.email,
-    }
-
+    };
   }
 }

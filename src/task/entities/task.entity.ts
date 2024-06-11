@@ -1,31 +1,36 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  JoinTable,
+  ManyToOne,
+} from 'typeorm';
 import { Priority } from '../enums/priority.enum';
+import { User } from 'src/users/entities/user.entity';
 
-export type TaskDocument = HydratedDocument<Task>;
-
-@Schema()
+@Entity()
 export class Task {
-  @Prop({ type: String })
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
   title: string;
 
-  @Prop({ type: String })
+  @Column()
   description: string;
 
-  @Prop()
-  userId: string;
+  @ManyToOne(() => User, (user) => user.tasks, { eager: true })
+  user: User;
 
-  @Prop({ type: Number, enum: Priority, default: Priority.Low})
+  @Column({ type: Number, enum: Priority, default: Priority.Low })
   priority: number;
 
-  @Prop({ type: Date })
+  @Column({ type: Date })
   dueDate: Date;
- 
-  @Prop({ type: Boolean, default: false})
+
+  @Column({ type: Boolean, default: false })
   completionStatus: boolean;
 
-  @Prop({ type: Number, default: 1})
+  @Column({ type: Number, default: 1 })
   evaluationPoints: number;
 }
-
-export const TaskSchema = SchemaFactory.createForClass(Task);

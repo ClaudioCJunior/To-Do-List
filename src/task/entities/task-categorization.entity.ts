@@ -10,8 +10,9 @@ export class TaskCategorization {
   @Prop({ type: String })
   taskId: string;
 
-  @Prop({ type: Number, enum: Categorization, default: Categorization.Home})
+  @Prop({ type: Number, enum: Categorization, default: Categorization.Home })
   categorization: number;
 }
 
-export const TaskCategorizationSchema = SchemaFactory.createForClass(TaskCategorization);
+export const TaskCategorizationSchema =
+  SchemaFactory.createForClass(TaskCategorization);
