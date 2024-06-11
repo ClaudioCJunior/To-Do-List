@@ -4,12 +4,13 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TaskModule } from './task/task.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CategorizationModule } from './categorization/categorization.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
-    TypeOrmModule.forRoot({
+    TypeOrmModule.forRoot({ //TODO Adicionar no .env
       type: 'postgres',
       host: 'localhost',
       port: 5432,
@@ -20,6 +21,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true,
     }),
     TaskModule,
+    CategorizationModule,
   ],
   controllers: [AppController],
   providers: [],

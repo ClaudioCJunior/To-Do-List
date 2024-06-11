@@ -4,6 +4,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
+import { CategorizationService } from 'src/categorization/categorization.service';
 
 
 @Injectable()
@@ -11,11 +12,18 @@ export class TaskService {
   constructor(
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
+    private categorizationService: CategorizationService
   ) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    const user = this.taskRepository.create(createTaskDto);
-    return this.taskRepository.save(user);
+    const categorizations = await this.categorizationService.findAllByIds(createTaskDto.listCategorization);
+
+    createTaskDto.categorizations = categorizations;
+
+    console.log(createTaskDto);
+
+    const task = this.taskRepository.create(createTaskDto);
+    return this.taskRepository.save(task);
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
@@ -66,6 +74,10 @@ export class TaskService {
       throw new Error('Task not found');
     }
     return await this.taskRepository.delete(id);
+  }
+
+  async findAllByCategorizationAndUser( categorizationId: number, userId: number): Promise<Task[]> {
+    return this.taskRepository.find({ where: { categorizations: { id: categorizationId }, user: { id: userId } } });
   }
 
   // async findOneByDateDueAndUserId(

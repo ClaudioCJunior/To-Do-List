@@ -12,13 +12,14 @@ import {
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { CategorizationService } from 'src/categorization/categorization.service';
 
 @Controller('task')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto, @Req() req: any) {
+  async create(@Body() createTaskDto: CreateTaskDto, @Req() req: any) {
       createTaskDto.user = req.user;
 
       //TODO: Adiciona validações para não duplicar atividades
@@ -50,4 +51,10 @@ export class TaskController {
   remove(@Param('id') id: number, @Req() req: any) {
     return this.taskService.removeByIdAndUserId(id, req.user.id);
   }
+
+  @Get('categorization/:id')
+  findBycategorization(@Param('id') id: number, @Req() req: any) {
+    return this.taskService.findAllByCategorizationAndUser(id, req.user.id);
+  }
+  
 }

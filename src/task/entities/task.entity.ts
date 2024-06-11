@@ -4,9 +4,11 @@ import {
   PrimaryGeneratedColumn,
   JoinTable,
   ManyToOne,
+  ManyToMany,
 } from 'typeorm';
 import { Priority } from '../enums/priority.enum';
 import { User } from 'src/users/entities/user.entity';
+import { Categorization } from '../../categorization/entities/categorization.entity';
 
 @Entity()
 export class Task {
@@ -19,7 +21,7 @@ export class Task {
   @Column()
   description: string;
 
-  @ManyToOne(() => User, (user) => user.tasks, { eager: true })
+  @ManyToOne(() => User, (user) => user.tasks)
   user: User;
 
   @Column({ type: Number, enum: Priority, default: Priority.Low })
@@ -33,4 +35,8 @@ export class Task {
 
   @Column({ type: Number, default: 1 })
   evaluationPoints: number;
+
+  @ManyToMany(() => Categorization, categorization => categorization.tasks, { cascade: true, eager: true })
+  @JoinTable()
+  categorizations: Categorization[];
 }

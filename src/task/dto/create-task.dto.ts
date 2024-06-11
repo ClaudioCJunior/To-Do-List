@@ -5,8 +5,10 @@ import {
   Max,
   Min,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
+import { Categorization } from '../../categorization/entities/categorization.entity';
 
 export class CreateTaskDto {
   @IsNotEmpty()
@@ -31,6 +33,8 @@ export class CreateTaskDto {
   @IsBoolean()
   completionStatus: boolean;
 
-  //@IsArray()
-  //categorization: number[];
+  @IsArray()
+  listCategorization: number[];
+
+  categorizations: Categorization[];
 }
