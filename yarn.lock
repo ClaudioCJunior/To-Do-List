@@ -768,7 +768,7 @@
   resolved "https://registry.npmjs.org/@nestjs/mongoose/-/mongoose-10.0.6.tgz"
   integrity sha512-J8jFgSvCDEKMXU57QAIdXIlWQsOFWK+x0PM1KI/0zHe3/4JrAtFGTFD08hRX3IHk+WJT9g/XQIpMSNM7/10Jlg==
 
-"@nestjs/platform-express@^10.0.0":
+"@nestjs/platform-express@^10.0.0", "@nestjs/platform-express@^10.3.9":
   version "10.3.9"
   resolved "https://registry.npmjs.org/@nestjs/platform-express/-/platform-express-10.3.9.tgz"
   integrity sha512-si/UzobP6YUtYtCT1cSyQYHHzU3yseqYT6l7OHSMVvfG1+TqxaAqI6nmrix02LO+l1YntHRXEs3p+v9a7EfrSQ==

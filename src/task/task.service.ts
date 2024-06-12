@@ -52,7 +52,15 @@ export class TaskService {
     queryBuilder.where('task.user = :userId', { userId });
 
     if (listTaskDto.filter) {
-      queryBuilder.andWhere('task.' + listTaskDto.filter.field + ' = :value', { value: listTaskDto.filter.value });
+      let i = 0;
+      for (let filter of listTaskDto.filter) {
+        if(filter.field == "categorization"){
+          queryBuilder.andWhere('categorizations.id = :value' + i, { ['value' + i]: filter.value });
+        }else{
+          queryBuilder.andWhere('task.' + filter.field + ' = :value' + i, { ['value' + i]: filter.value });
+        }
+        i++;
+      }
     }
 
     if (listTaskDto.sort) {

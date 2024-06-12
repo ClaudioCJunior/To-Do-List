@@ -1,9 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Headers} from '@nestjs/common';
 import { SignInDto } from './dto/signIn.dto';
 import { AuthService } from './auth.service';
-import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post, Head} from '@nestjs/common';
 import { Public } from './decorators/auth.decorator';
 import { RegisterDto } from './dto/register.dto';
+
 
 @Controller('auth')
 export class AuthController {
@@ -21,5 +22,11 @@ export class AuthController {
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('verify-token')
+  verifyToken(@Headers('authorization') authHeader: string) {
+    return this.authService.verifyToken(authHeader);
   }
 }
