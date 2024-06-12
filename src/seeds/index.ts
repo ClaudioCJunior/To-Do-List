@@ -10,7 +10,6 @@ async function runSeeders() {
   await categorizationSeeder.seed();
 
   await app.close();
-  console.log('Seeding completed successfully.');
 }
 
 runSeeders().catch(error => {

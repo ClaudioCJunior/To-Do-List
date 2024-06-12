@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { SignInDto } from './dto/signIn.dto';
@@ -19,6 +19,10 @@ export class AuthService {
     signInDto: SignInDto,
   ): Promise<{ user: Record<string, string>; token: string }> {
     const user = await this.usersService.findOneByEmail(signInDto.email);
+
+    if(!user){
+      throw new NotFoundException("user not found");
+    }
 
     if (!(await bcrypt.compare(signInDto.password, user.password))) {
       throw new UnauthorizedException();
@@ -64,13 +68,11 @@ export class AuthService {
       const res : User = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'), //TODO adicionar em variável de ambiente
       });
-      
-      console.log(res);
 
       const payload = { id: res.id, name: res.name, email: res.email };
 
       return {
-        user : {  name: payload.name, email: payload.email },
+        user : { id: String(payload.id), name: payload.name, email: payload.email },
         token: token,
       };
 

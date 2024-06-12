@@ -17,6 +17,7 @@ import { SortTaskDto } from './dto/sort-task.dto';
 import { ListTaskDto } from './dto/list-task.dto';
 import { Priority } from './enums/priority.enum';
 import { Query } from '@nestjs/common';
+import { DeleteResult } from 'typeorm';
 
 @Controller('task')
 export class TaskController {
@@ -30,12 +31,13 @@ export class TaskController {
 
   @Get()
   async findAll(@Req() req: any, @Query() query: any) { 
-    const listTaskDto = this.taskService.transformQueryParams(query);
 
-    console.log(listTaskDto);
+    let listTaskDto: ListTaskDto = new ListTaskDto();
+    if(query){
+      listTaskDto = this.taskService.transformQueryParams(query);
+    }
 
     const tasks = await this.taskService.findAllByUserIdWithSort(req.user.id, listTaskDto);
-    console.log(tasks);
 
     const updatedTasks = tasks.map(task => {
       return {
@@ -64,14 +66,16 @@ export class TaskController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number, @Req() req: any) {
-    return this.taskService.removeByIdAndUserId(id, req.user.id);
+  async remove(@Param('id') id: number, @Req() req: any) {
+    const res : DeleteResult = await this.taskService.removeByIdAndUserId(id, req.user.id);
+
+    if(res.affected < 0){
+      throw new  Error('Error deleting task');
+    }
   }
 
   @Patch(':id')
   updateStatus(@Param('id') id: number, @Req() req: any, @Body() body: any ) {
-    console.log(body.completionStatus)
-
     return this.taskService.updateStatusByIdAndUserId(
       id,
       req.user.id,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
@@ -17,6 +17,10 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
+    if(this.findAllByTitleAndDescriptionAndUser(createTaskDto.title, createTaskDto.description, createTaskDto.user.id)){
+      throw new ConflictException('Task already exists for user');
+    }
+
     const categorizations = await this.categorizationService.findAllByIds(createTaskDto.listCategorization);
 
     createTaskDto.categorizations = categorizations;
@@ -28,7 +32,7 @@ export class TaskService {
   async update(id: number, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.taskRepository.findOne({ where: { id } });
     if (!task) {
-      throw new Error('User not found');
+      throw new NotFoundException('Task not found');
     }
     this.taskRepository.merge(task, updateTaskDto);
     return this.taskRepository.save(task);
@@ -47,27 +51,31 @@ export class TaskService {
   }
 
   async findAllByUserIdWithSort(userId: number, listTaskDto: ListTaskDto): Promise<Task[]> {
+    console.log(userId);
+    
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
     queryBuilder.leftJoinAndSelect('task.categorizations', 'categorizations');
-    queryBuilder.where('task.user = :userId', { userId });
+    queryBuilder.where('task.userId = :userId', { userId });
 
     if (listTaskDto.filter) {
       let i = 0;
       for (let filter of listTaskDto.filter) {
-        if(filter.field == "categorization"){
-          queryBuilder.andWhere('categorizations.id = :value' + i, { ['value' + i]: filter.value });
-        }else{
-          queryBuilder.andWhere('task.' + filter.field + ' = :value' + i, { ['value' + i]: filter.value });
+        if(filter.field && filter.value){
+          if(filter.field == "categorization"){
+            queryBuilder.andWhere('categorizations.id = :value' + i, { ['value' + i]: filter.value });
+          }else{
+            queryBuilder.andWhere('task.' + filter.field + ' = :value' + i, { ['value' + i]: filter.value });
+          }
         }
         i++;
       }
     }
 
     if (listTaskDto.sort) {
-      queryBuilder.orderBy('task.' + listTaskDto.sort.field, listTaskDto.sort.direction == 'ASC' ? 'ASC' : 'DESC');
+      if(listTaskDto.sort.field && listTaskDto.sort.direction){
+        queryBuilder.orderBy('task.' + listTaskDto.sort.field, listTaskDto.sort.direction == 'ASC' ? 'ASC' : 'DESC');
+      }
     }
-
-    console.log(queryBuilder.getQuery());
 
     return queryBuilder.getMany();
   }
@@ -90,7 +98,6 @@ export class TaskService {
     if (!task) {
       throw new Error('Task not found');
     }
-    console.log(completionStatus);
 
     task.completionStatus = completionStatus;
     return this.taskRepository.save(task);
@@ -100,10 +107,19 @@ export class TaskService {
     return await this.taskRepository.findOne({ where: { id, user: { id: userId } } });
   }
 
+  async findAllByTitleAndDescriptionAndUser(title: string, description: string, userId: number): Promise<Task[]> {
+    const queryBuilder = this.taskRepository.createQueryBuilder('task');
+    queryBuilder.where('task.title = :title', { title });
+    queryBuilder.andWhere('task.description = :description', { description });
+    queryBuilder.andWhere('task.user = :userId', { userId });
+    queryBuilder.andWhere('task.completionStatus = :completionStatus', { completionStatus: false }); 
+    return queryBuilder.getMany();
+  }
+
   async removeByIdAndUserId(id: number, userId: number): Promise<DeleteResult> {
     const task = await this.taskRepository.findOne({ where: { id, user: { id: userId } } });
     if (!task) {
-      throw new Error('Task not found');
+      throw new NotFoundException('Task not found');
     }
     return await this.taskRepository.delete(id);
   }

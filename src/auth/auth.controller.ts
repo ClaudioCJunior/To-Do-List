@@ -1,20 +1,23 @@
-import { Controller, Headers} from '@nestjs/common';
+import { ConflictException, Controller, Headers} from '@nestjs/common';
 import { SignInDto } from './dto/signIn.dto';
 import { AuthService } from './auth.service';
 import { Body, HttpCode, HttpStatus, Post, Head} from '@nestjs/common';
 import { Public } from './decorators/auth.decorator';
 import { RegisterDto } from './dto/register.dto';
+import { UsersService } from 'src/users/users.service';
 
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   signIn(@Body() signInDto: SignInDto) {
-    console.log(signInDto);
     return this.authService.signIn(signInDto);
   }
 
@@ -22,6 +25,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
+    if(this.usersService.findOneByEmail(registerDto.email)){
+      throw new ConflictException('Email already exists');
+    }
+
     return this.authService.register(registerDto);
   }
 
