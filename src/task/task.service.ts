@@ -17,7 +17,9 @@ export class TaskService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto): Promise<Task> {
-    if(this.findAllByTitleAndDescriptionAndUser(createTaskDto.title, createTaskDto.description, createTaskDto.user.id)){
+    const tasks = await this.findAllByTitleAndDescriptionAndUser(createTaskDto.title, createTaskDto.description, createTaskDto.user.id);
+    
+    if(tasks.length > 0){
       throw new ConflictException('Task already exists for user');
     }
 
@@ -51,8 +53,6 @@ export class TaskService {
   }
 
   async findAllByUserIdWithSort(userId: number, listTaskDto: ListTaskDto): Promise<Task[]> {
-    console.log(userId);
-    
     const queryBuilder = this.taskRepository.createQueryBuilder('task');
     queryBuilder.leftJoinAndSelect('task.categorizations', 'categorizations');
     queryBuilder.where('task.userId = :userId', { userId });
