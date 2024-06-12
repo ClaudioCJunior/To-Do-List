@@ -67,6 +67,8 @@ export class TaskService {
       queryBuilder.orderBy('task.' + listTaskDto.sort.field, listTaskDto.sort.direction == 'ASC' ? 'ASC' : 'DESC');
     }
 
+    console.log(queryBuilder.getQuery());
+
     return queryBuilder.getMany();
   }
 
@@ -106,7 +108,21 @@ export class TaskService {
     return await this.taskRepository.delete(id);
   }
 
-  async findAllByCategorizationAndUser( categorizationId: number, userId: number): Promise<Task[]> {
-    return this.taskRepository.find({ where: { categorizations: { id: categorizationId }, user: { id: userId } } });
+  transformQueryParams(query: any): any {
+    const transformed = { filter: [], sort: {} };
+
+    Object.keys(query).forEach((key) => {
+      const value = query[key];
+      if(key == "sort"){
+        transformed.sort = value;
+      }else{
+        transformed.filter = value;
+      }
+    });
+
+    return transformed;
   }
+
+
+
 }
