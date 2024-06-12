@@ -5,12 +5,14 @@ import { SignInDto } from './dto/signIn.dto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async signIn(
@@ -45,17 +47,25 @@ export class AuthService {
 
       const partsToken = authHeader.split(' ');
 
-      if(partsToken.length !== 2)
+      if(partsToken.length > 2)
         throw new UnauthorizedException();
 
-      const [ scheme, token ] = partsToken;    
+      let token = authHeader;
 
-      if(!/^Bearer$/i.test(scheme))
-        throw new UnauthorizedException();
+      if(partsToken.length == 2) {
+        let [ scheme, tokenExtract ] = partsToken;    
+
+        if(!/^Bearer$/i.test(scheme))
+          throw new UnauthorizedException();
+
+        token = tokenExtract;
+      }
 
       const res : User = await this.jwtService.verifyAsync(token, {
-        secret: 'asdf1234', //TODO adicionar em variável de ambiente
+        secret: this.configService.get<string>('JWT_SECRET'), //TODO adicionar em variável de ambiente
       });
+      
+      console.log(res);
 
       const payload = { id: res.id, name: res.name, email: res.email };
 
