@@ -46,6 +46,6 @@ $ yarn run test:cov
 
 ## Stay in touch
 
-- Author - [Claudio Cruz](www.linkedin.com/in/claudio-cruz-91156b142)
+- Author - [Claudio Cruz](https://www.linkedin.com/in/claudio-cruz-91156b142)
 
 
