@@ -12,6 +12,25 @@ Note: The project was made with NodeJS version 20.12.2.
 $ yarn install
 ```
 
+## Add file .env
+
+```bash
+JWT_SECRET="C709C85D874A9FAE4E57226BFA1A94B5"
+JWT_EXPIRES_IN=10min
+
+NODE_ENV=development
+
+#DB DESENV
+DB_USERNAME=postgres
+DB_PASSWORD=admin
+DB_DATABASE=todolist
+DB_HOST=localhost
+DB_PORT=5432
+DB_DIALECT=postgres
+
+```
+Note: Modify the information as needed.
+
 ## Running the seeds
 
 ```bash
