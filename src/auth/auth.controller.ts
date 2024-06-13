@@ -24,8 +24,8 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    if(this.usersService.findOneByEmail(registerDto.email)){
+  async register(@Body() registerDto: RegisterDto) {
+    if(await this.usersService.findOneByEmail(registerDto.email)){
       throw new ConflictException('Email already exists');
     }
 
